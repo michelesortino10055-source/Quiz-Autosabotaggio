@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Scopri cosa ti blocca — Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --bg-card: #F4F7FB;
+    --bg-card-hover: #EAF0FA;
+    --text: #000000;
+    --text-muted: #1A1A1A;
+    --accent: #2563EB;
+    --accent-dark: #1E3A8A;
+    --accent-muted: rgba(37, 99, 235, 0.08);
+    --border: #E2E8F0;
+    --border-selected: #2563EB;
+    --radius: 12px;
+  }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  .progress-bar-wrap {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; background: #E2E8F0; z-index: 100;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--accent);
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    position: fixed; top: 10px; right: 16px;
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 0.05em; z-index: 100;
+  }
+
+  .screen {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; min-height: 100vh;
+    padding: 48px 24px 32px;
+    max-width: 520px; margin: 0 auto; width: 100%;
+    animation: fadeUp 0.35s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .intro-eyebrow {
+    font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent-dark);
+    margin-bottom: 24px; font-weight: 600;
+  }
+  .intro-title {
+    font-size: clamp(22px, 6vw, 30px); font-weight: 700;
+    line-height: 1.3; margin-bottom: 20px; color: var(--text);
+  }
+  .intro-body {
+    font-size: 15px; color: var(--text-muted);
+    line-height: 1.75; margin-bottom: 40px;
+  }
+  .intro-body strong { color: var(--text); font-weight: 600; }
+
+  .btn {
+    display: inline-block; background: var(--accent);
+    color: #fff; font-family: inherit; font-size: 15px;
+    font-weight: 600; padding: 16px 32px;
+    border-radius: var(--radius); border: none;
+    cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+    text-align: center; width: 100%; letter-spacing: 0.01em;
+    text-decoration: none;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  .q-microcopy {
+    font-size: 12px; color: var(--accent-dark);
+    letter-spacing: 0.04em; margin-bottom: 20px;
+    font-style: italic; font-weight: 500;
+  }
+  .q-transition {
+    font-size: 14px; color: var(--text-muted);
+    border-left: 3px solid var(--accent);
+    background: var(--accent-muted);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px; margin-bottom: 28px; line-height: 1.6;
+  }
+  .q-text {
+    font-size: clamp(18px, 5vw, 22px); font-weight: 700;
+    line-height: 1.35; margin-bottom: 28px; color: var(--text);
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    font-size: 14px; font-family: inherit; color: var(--text);
+    cursor: pointer; text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    line-height: 1.45; min-height: 54px;
+    display: flex; align-items: center;
+  }
+  .option:hover { border-color: var(--accent); background: var(--accent-muted); }
+  .option.selected { border-color: var(--accent); background: var(--accent-muted); transform: scale(0.99); }
+
+  .q-textarea {
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    font-family: inherit; font-size: 15px; line-height: 1.6;
+    padding: 16px; width: 100%; resize: none;
+    min-height: 110px; margin-bottom: 16px;
+    transition: border-color 0.15s;
+  }
+  .q-textarea:focus { outline: none; border-color: var(--accent); }
+  .q-textarea::placeholder { color: #9CA3AF; }
+
+  .contact-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .contact-sub {
+    font-size: 14px; color: var(--text-muted);
+    margin-bottom: 32px; line-height: 1.7;
+  }
+  .contact-sub em { color: var(--text); font-style: normal; font-weight: 500; }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent-dark); margin-bottom: 6px; font-weight: 600;
+  }
+  .field input {
+    width: 100%; background: var(--bg-card);
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-family: inherit; font-size: 15px;
+    padding: 14px 16px; transition: border-color 0.15s;
+  }
+  .field input:focus { outline: none; border-color: var(--accent); }
+  .field input::placeholder { color: #9CA3AF; }
+  .field-note { font-size: 11px; color: #6B7280; margin-top: 5px; }
+  .field.optional label::after {
+    content: ' — opzionale'; font-style: italic;
+    text-transform: none; letter-spacing: 0; font-weight: 400;
+  }
+  .privacy-note {
+    font-size: 11px; color: #9CA3AF;
+    text-align: center; margin-top: 14px; line-height: 1.5;
+  }
+
+  .loading-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; text-align: center; padding: 48px 24px;
+  }
+  .loading-steps { display: flex; flex-direction: column; gap: 18px; margin-bottom: 40px; }
+  .loading-step {
+    font-size: 15px; color: #9CA3AF;
+    display: flex; align-items: center; gap: 12px;
+    transition: color 0.4s;
+  }
+  .loading-step.active { color: var(--text); }
+  .loading-step.done { color: var(--accent); }
+  .step-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); flex-shrink: 0; transition: background 0.4s;
+  }
+  .loading-step.active .step-dot { background: var(--accent); animation: pulse 1s infinite; }
+  .loading-step.done .step-dot { background: var(--accent); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .loading-bar-wrap {
+    width: 200px; height: 2px; background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .loading-bar-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 0.4s ease;
+  }
+
+  .report-screen { min-height: 100vh; padding: 0; max-width: 100%; animation: fadeUp 0.4s ease forwards; }
+  .report-header {
+    background: linear-gradient(160deg, #EBF2FF 0%, #F4F7FB 100%);
+    padding: 56px 24px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .report-header-inner { max-width: 520px; margin: 0 auto; }
+  .report-badge {
+    display: inline-block; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent-dark); background: var(--accent-muted);
+    border: 1px solid rgba(37,99,235,0.2);
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .report-title {
+    font-size: clamp(22px, 5.5vw, 28px); font-weight: 700;
+    line-height: 1.3; color: var(--text);
+  }
+  .report-body { padding: 36px 24px 60px; max-width: 520px; margin: 0 auto; }
+  .report-section { margin-bottom: 32px; }
+  .report-section-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--accent-dark);
+    margin-bottom: 12px; font-weight: 600;
+  }
+  .report-p { font-size: 15px; line-height: 1.8; color: #0A0A0A; margin-bottom: 16px; }
+  .report-p:last-child { margin-bottom: 0; }
+  .report-highlight {
+    background: #EBF2FF; border-left: 3px solid var(--accent);
+    padding: 20px; border-radius: 0 var(--radius) var(--radius) 0; margin: 24px 0;
+  }
+  .report-highlight p { font-size: 14px; line-height: 1.75; color: #0A0A0A; margin-bottom: 10px; }
+  .report-highlight p:last-child { margin-bottom: 0; }
+  .report-highlight strong { color: var(--text); font-weight: 600; }
+  .report-cta-block {
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 28px 24px;
+    text-align: center; margin-top: 40px;
+  }
+  .report-cta-block p { font-size: 14px; color: #0A0A0A; margin-bottom: 20px; line-height: 1.6; }
+  .report-divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  @media (min-width: 600px) {
+    .screen { padding: 64px 40px 40px; }
+    .report-header { padding: 72px 40px 48px; }
+    .report-header-inner, .report-body { max-width: 560px; }
+    .report-body { padding: 44px 40px 80px; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ─────────────────────────────
+// CONFIG
+// ─────────────────────────────
+const WA_URL     = 'https://wa.me/393500036367?text=Ciao%20Michele%2C%20ho%20fatto%20il%20quiz%2C%20adesso%20voglio%20fare%20questa%20call%20insieme%20per%20uscire%20da%20questo%20loop%20una%20volta%20per%20tutte.';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz4ovV5dBv6NuTI2xrlGDTB8iiDuWjF_aD5HQVNL0xzzPqVjDQax69dN7fOU1Z0dc3HXQ/exec';
+
+// ─────────────────────────────
+// STATE
+// ─────────────────────────────
+const state = {
+  flow: ['intro','D1','D2','D3','D4'],
+  scores: { A:0, B:0, C:0 },
+  profile: null,
+  answers: {},
+  openAnswer: '',
+  user: { name:'', email:'', whatsapp:'' }
+};
+
+const BRANCH = {
+  A: ['DA1','DA2','DA3','DA4','DA5'],
+  B: ['DB1','DB2','DB3','DB4','DB5'],
+  C: ['DC1','DC2','DC3','DC4','DC5']
+};
+
+// ─────────────────────────────
+// QUESTIONS
+// ─────────────────────────────
+const Q = {
+  D1: {
+    microcopy: null, transition: null,
+    text: "Quante volte negli ultimi anni hai detto 'da lunedì inizio' — e quel lunedì non è mai arrivato?",
+    options: [
+      {text:'Una o due volte'},
+      {text:'Tre o cinque volte'},
+      {text:'Più di cinque — ma al lunedì non sono mai arrivato'},
+      {text:'Ho smesso di contare'}
+    ]
+  },
+  D2: {
+    microcopy: 'Già il numero che hai scelto mi dice qualcosa.',
+    transition: null,
+    text: 'Quando decidi che stavolta inizi davvero, cosa succede nei giorni successivi?',
+    options: [
+      {text:'Comincio a cercare il metodo giusto, il momento giusto, le condizioni giuste — e non parto', score:'A'},
+      {text:'Parto bene, poi basta un errore e torno al punto di partenza', score:'B'},
+      {text:'Dipende da come mi sento — quando sono in forma mentale volo, quando non lo sono scompaio', score:'C'}
+    ]
+  },
+  D3: {
+    microcopy: 'Ok. Comincio a capire.',
+    transition: null,
+    text: "L'ultima volta che hai smesso, come te la sei raccontata?",
+    options: [
+      {text:'Non era ancora il momento giusto / dovevo capire ancora qualcosa', score:'A'},
+      {text:'Ho sbagliato qualcosa e da lì è crollato tutto', score:'B'},
+      {text:"Non me la sono raccontata — sono fatto così, lo so già", score:'C'}
+    ]
+  },
+  D4: {
+    microcopy: 'Da qui le domande diventano più specifiche.',
+    transition: null,
+    text: 'Cosa sai già di te che ti renderà difficile iniziare questa settimana?',
+    options: [
+      {text:'Che troverò un motivo per aspettare ancora', score:'A'},
+      {text:'Che basta un errore per mandarmi fuori strada', score:'B'},
+      {text:'Che se non sono nella testa giusta, non combino niente', score:'C'}
+    ]
+  },
+  DA1: {
+    microcopy: null,
+    transition: 'Già. Non è che non vuoi — è che aspetti sempre che qualcosa si allinei prima.',
+    text: "Qual è la scusa che usi più spesso? Quella che sai già che useresti anche stavolta.",
+    options: [
+      {text:'"Aspetto che finisca questo periodo di casino"'},
+      {text:'"Voglio capire ancora questo / finire ancora quello"'},
+      {text:'"Non mi sento ancora pronto — quando sono pronto parto"'},
+      {text:'"Da lunedì inizio sul serio"'}
+    ]
+  },
+  DA2: {
+    microcopy: null, transition: null,
+    text: "Quante volte ti è capitato di avere il piano perfetto in testa e non partire comunque?",
+    options: [
+      {text:'Quasi mai — quando ho il piano, parto'},
+      {text:'Qualche volta'},
+      {text:"Spesso — il piano c'è ma l'azione no"},
+      {text:'Sempre — più il piano è preciso, meno riesco a iniziare'}
+    ]
+  },
+  DA3: {
+    microcopy: 'Non sto raccogliendo risposte a caso.', transition: null,
+    text: "Se qualcuno costruisse il percorso per te — senza che tu debba scegliere niente — pensi che partiresti?",
+    options: [
+      {text:'Sì, probabilmente sì'},
+      {text:'Forse — ma troverei un altro problema'},
+      {text:'Non lo so'},
+      {text:"Onestamente no — c'è sempre qualcosa che non va"}
+    ]
+  },
+  DA4: {
+    microcopy: null, transition: null,
+    text: "Sai già come va a finire se ci provi da solo ancora una volta?",
+    options: [
+      {text:'No — questa volta è diverso'},
+      {text:'Probabilmente sì, ma non voglio ammetterlo'},
+      {text:'Sì, e fa schifo ammetterlo'},
+      {text:'Sì — è per questo che sono qui'}
+    ]
+  },
+  DA5: {
+    microcopy: null, transition: null,
+    text: "Cosa ti costerebbe di più continuare così per altri due anni?",
+    type: 'open', placeholder: 'Scrivi quello che ti viene...'
+  },
+  DB1: {
+    microcopy: null,
+    transition: 'Capito. Non è partire il problema — quello lo sai fare. È quello che succede dopo il primo errore.',
+    text: "Quando sgarri su cibo o allenamento, cosa succede subito dopo?",
+    options: [
+      {text:'Recupero e vado avanti senza pensarci'},
+      {text:'Mi sento in colpa ma continuo lo stesso'},
+      {text:'Scatta qualcosa di automatico — finisco per esagerare ancora di più'},
+      {text:"'Ormai ho rovinato tutto' — e smetto"}
+    ]
+  },
+  DB2: {
+    microcopy: null, transition: null,
+    text: "Ti è mai capitato di mangiare qualcosa 'fuori piano' e finire per mangiare molto di più — come se ormai tanto valesse?",
+    options: [
+      {text:'No, riesco a fermarmi'},
+      {text:'A volte sì'},
+      {text:"Spesso — è come se si aprisse uno sportello"},
+      {text:'Sempre — basta uno sgarro e parte il meccanismo'}
+    ]
+  },
+  DB3: {
+    microcopy: 'Non sto raccogliendo risposte a caso.', transition: null,
+    text: "Qual è la frase che ti dici dopo aver mollato?",
+    options: [
+      {text:'"Tanto sono fatto così"'},
+      {text:'"Da lunedì si ricomincia da capo"'},
+      {text:'"Mi sento uno schifo — ma domani torno in carreggiata"'},
+      {text:'"Non ho la forza di volontà degli altri"'}
+    ]
+  },
+  DB4: {
+    microcopy: null, transition: null,
+    text: "Quanto duravi di solito quando le cose andavano bene?",
+    options: [
+      {text:'Pochi giorni'},
+      {text:'Una o due settimane'},
+      {text:'Un mese o più'},
+      {text:'Anche mesi — il problema non è partire, è non mollare dopo il primo errore'}
+    ]
+  },
+  DB5: {
+    microcopy: null, transition: null,
+    text: "Se avessi qualcuno con cui confrontarti ogni giorno — qualcuno che vede cosa fai — cambierebbe qualcosa per te?",
+    options: [
+      {text:'Sì — sapere che qualcuno vede cambia il mio comportamento'},
+      {text:'Forse — dipende da come lo fa, non voglio sentirmi giudicato'},
+      {text:"Non lo so — non l'ho mai provato davvero"},
+      {text:'Probabilmente no — il problema è mio'}
+    ]
+  },
+  DC1: {
+    microcopy: null,
+    transition: 'Quando sei on, sei inarrestabile. Il problema è il resto — e lo sai già.',
+    text: "Quando sei 'on', quanto dura di solito prima che si spenga?",
+    options: [
+      {text:'Qualche giorno — mi accendo e spengo veloce'},
+      {text:'Una o due settimane'},
+      {text:'Un mese o più, poi crolla tutto'},
+      {text:"Dipende da cos'altro sta succedendo nella mia vita"}
+    ]
+  },
+  DC2: {
+    microcopy: null, transition: null,
+    text: "Cosa deve succedere fuori di te per farti sparire da un percorso?",
+    options: [
+      {text:'Qualcosa va storto al lavoro o in un rapporto'},
+      {text:'Un calo di energie — stress, sonno, periodo pesante'},
+      {text:'Niente di preciso — la motivazione si esaurisce da sola'},
+      {text:'Basta che le cose smettano di andare bene'}
+    ]
+  },
+  DC3: {
+    microcopy: 'Non sto raccogliendo risposte a caso.', transition: null,
+    text: "Quanto ci metti di solito a tornare dopo un periodo off?",
+    options: [
+      {text:'Qualche giorno'},
+      {text:'Una o due settimane'},
+      {text:'Un mese o più'},
+      {text:'A volte non torno — aspetto che riparta tutto'}
+    ]
+  },
+  DC4: {
+    microcopy: null, transition: null,
+    text: "Quante volte hai aspettato di sentirti 'nella testa giusta' per iniziare — e quel momento non è mai arrivato?",
+    options: [
+      {text:'Mai — quando sono pronto parto'},
+      {text:'Qualche volta'},
+      {text:'Spesso'},
+      {text:'Praticamente sempre'}
+    ]
+  },
+  DC5: {
+    microcopy: null, transition: null,
+    text: "Se qualcuno ti scrivesse ogni giorno per tenerti nel percorso anche quando non te la senti — ti aiuterebbe o ti darebbe fastidio?",
+    options: [
+      {text:'Mi aiuterebbe — è esattamente quello che mi serve'},
+      {text:'Dipende da come lo fa — non voglio sentirmi controllato'},
+      {text:'Non lo so'},
+      {text:'Probabilmente mi darebbe fastidio'}
+    ]
+  }
+};
+
+// ─────────────────────────────
+// REPORTS
+// ─────────────────────────────
+function getReport(profile, name) {
+  const n = name || 'Ehi';
+  const reports = {
+    A: {
+      badge: 'Il Da Lunedì',
+      title: `${n}, da lunedì. Vero?`,
+      body: `
+        <div class="report-section">
+          <p class="report-p">Lo sai già. Non ti sto dicendo niente di nuovo.</p>
+          <p class="report-p">Ogni volta che ti avvicini al momento di iniziare, trovi qualcosa. Un progetto da finire. Un periodo che non è quello giusto. Un metodo che devi ancora capire bene. E la cosa strana è che sei consapevole del meccanismo — se qualcuno te lo fa notare, gli dai ragione. Però poi trovi comunque un appiglio per non muoverti.</p>
+          <p class="report-p">La scusa cambia ogni volta. La sostanza no.</p>
+        </div>
+        <div class="report-divider"></div>
+        <div class="report-section">
+          <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">Non è pigrizia. Non ti manca nemmeno la motivazione, almeno non nel senso che si intende di solito. Il punto è un altro: ogni volta che non inizi, eviti di raccogliere un'altra prova che non riesci a fare quello che ti sei promesso. Rimandare è più comodo che provarci e confermare la storia che hai su di te.</p>
+          <p class="report-p">Il problema è che questo meccanismo non si ferma da solo. Puoi aspettare il momento giusto per anni — e il momento giusto non arriverà mai, perché non esiste prima di iniziare. Esiste solo dopo.</p>
+        </div>
+        <div class="report-highlight">
+          <p><strong>Il programma lo costruisco io sulla tua routine reale</strong> — non un template adattato, qualcosa fatto per come sei organizzato tu. Non devi scegliere il metodo, non devi capire tutto prima.</p>
+          <p>Ogni giorno mi mandi un messaggio su WhatsApp — come è andata, positivo o negativo. Io rispondo, monitoro, aggiusto. Una volta al mese ci sentiamo in videochiamata.</p>
+          <p>Non devi aspettare il prossimo lunedì.</p>
+        </div>
+        <div class="report-cta-block">
+          <p>Se ti ha colpito qualcosa in quello che hai letto, scrivimi su WhatsApp — voglio capire la tua situazione e vedere se ha senso lavorare insieme.</p>
+          <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
+        </div>`
+    },
+    B: {
+      badge: 'Il Tutto o Niente',
+      title: `${n}, un biscotto. E poi tutto è crollato.`,
+      body: `
+        <div class="report-section">
+          <p class="report-p">Lo so già com'è andata. Sei partito bene — magari anche molto bene. Qualche giorno, qualche settimana, forse di più. E poi è successo qualcosa. Un pasto diverso dal previsto, un allenamento saltato, una giornata storta. E in quel momento è scattato qualcosa di automatico.</p>
+          <p class="report-p">Non ti sei detto "ho sbagliato, domani ci riprovo". Ti sei detto "ormai ho rovinato tutto" — e da lì è partito un meccanismo: hai finito per esagerare ancora di più, come se ormai tanto valesse. Come se il corpo e la testa dicessero "mangio adesso, chissà quando mi ricapita". E dopo ti sentivi uno schifo. Lo sapevi che avevi esagerato. Ti sei detto che la prossima settimana non sarebbe successo.</p>
+          <p class="report-p">E poi è successo di nuovo.</p>
+        </div>
+        <div class="report-divider"></div>
+        <div class="report-section">
+          <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">Non è che non hai forza di volontà. È che nessuno ti ha mai dato uno strumento per il momento dopo l'errore. Hai imparato benissimo come si parte — non hai imparato cosa si fa quando si cade.</p>
+          <p class="report-p">Il tuo ciclo non è un difetto del carattere. È un meccanismo che si ripete perché non hai ancora la struttura per interromperlo.</p>
+        </div>
+        <div class="report-highlight">
+          <p><strong>Quando sai che c'è qualcuno che vede cosa fai ogni giorno</strong>, il meccanismo si limita. Non sparisce subito — ma cambia qualcosa.</p>
+          <p>E quando lo sgarro succede comunque — perché succede, fa parte del percorso — il giorno dopo non sei solo. Non ricominci da zero. Sei ancora dentro, da dove ti sei fermato.</p>
+          <p>Il percorso di 6 mesi è costruito per funzionare anche dopo gli errori, non solo quando tutto va bene.</p>
+        </div>
+        <div class="report-cta-block">
+          <p>Se ti sei riconosciuto in questo ciclo e sei stanco di ricominciare sempre da zero — scrivimi su WhatsApp, fisserei una call per capire dove sei.</p>
+          <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
+        </div>`
+    },
+    C: {
+      badge: 'Il Petardo',
+      title: `${n}, quando sei on sei inarrestabile. Il problema è il resto.`,
+      body: `
+        <div class="report-section">
+          <p class="report-p">Non hai un problema di capacità. Quando sei in un buon periodo — quando le cose vanno, quando ti senti ottimista, quando hai energia — lo dimostri ogni volta. Ti alleni, mangi bene, sei concentrato. Funzioni.</p>
+          <p class="report-p">Poi qualcosa cambia. Fuori o dentro. Lo stress sale, la motivazione cala, la vita si complica. E con lei spariscono i buoni propositi, il ritmo, tutto. Non te la racconti come gli altri — non cerchi scuse elaborate. Dici semplicemente: "sono fatto così." E in un certo senso ci hai fatto la pace.</p>
+          <p class="report-p">Il problema è quello che questo ti costa ogni volta. Ogni periodo off è un reset. Il corpo recupera in fretta — la testa impiega di più.</p>
+        </div>
+        <div class="report-divider"></div>
+        <div class="report-section">
+          <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">La motivazione non precede l'azione — viene dall'azione. Aspettare di sentirti pronto per iniziare è come aspettare di avere fame prima di fare la spesa. Il momento giusto non arriva perché aspetti — arriva perché ci sei già dentro.</p>
+          <p class="report-p">Hai costruito una costanza che dipende da qualcosa che non puoi controllare. Non è un difetto — è che non hai ancora la struttura che funziona anche quando lo stato interno cambia.</p>
+        </div>
+        <div class="report-highlight">
+          <p><strong>Il percorso si adatta a com'è fatta la tua settimana reale</strong> — quando la vita si complica, si semplifica, non si abbandona.</p>
+          <p>Ogni giorno mi mandi un messaggio su WhatsApp — anche solo "oggi è stata una giornataccia". Io rispondo. Il filo rimane. Non devi aspettare di sentirti di nuovo al cento per cento per rientrare.</p>
+          <p>Non ti chiedo di essere sempre motivato. Ti chiedo di non sparire quando la motivazione cala.</p>
+        </div>
+        <div class="report-cta-block">
+          <p>Se hai sentito qualcosa in quello che hai letto — scrivimi su WhatsApp. Fisserei una call veloce per capire la tua situazione.</p>
+          <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
+        </div>`
+    }
+  };
+  return reports[profile];
+}
+
+// ─────────────────────────────
+// PROFILE ASSIGNMENT
+// ─────────────────────────────
+function assignProfile() {
+  const s = state.scores;
+  if (s.A > s.B && s.A > s.C) return 'A';
+  if (s.B > s.A && s.B > s.C) return 'B';
+  if (s.C > s.A && s.C > s.B) return 'C';
+  const d4 = state.answers['D4'];
+  return (d4 && d4.score) ? d4.score : 'A';
+}
+
+// ─────────────────────────────
+// GOOGLE SHEETS
+// ─────────────────────────────
+function sendToSheets() {
+  if (!SHEETS_URL) return;
+  const br = BRANCH[state.profile] || [];
+  const ba = br.map(id => state.answers[id] ? state.answers[id].text : '');
+  const params = new URLSearchParams({
+    name: state.user.name, email: state.user.email,
+    whatsapp: state.user.whatsapp, profile: state.profile || '',
+    d2: state.answers['D2'] ? state.answers['D2'].text : '',
+    d3: state.answers['D3'] ? state.answers['D3'].text : '',
+    d4: state.answers['D4'] ? state.answers['D4'].text : '',
+    b1: ba[0]||'', b2: ba[1]||'', b3: ba[2]||'',
+    b4: ba[3]||'', b5: ba[4] || state.openAnswer || ''
+  });
+  fetch(SHEETS_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: params.toString()
+  }).catch(()=>{});
+}
+
+// ─────────────────────────────
+// RENDER
+// ─────────────────────────────
+const app = document.getElementById('app');
+
+function renderIntro() {
+  app.innerHTML = `
+    <div class="screen">
+      <div class="intro-eyebrow">Quiz — 5 minuti</div>
+      <h1 class="intro-title">Non ti farò domande su quante volte vai in palestra.</h1>
+      <p class="intro-body">Ti farò domande su <strong>quello che succede quando smetti.</strong><br><br>
+      Perché il problema quasi mai è fisico. È quello che ti dici nel momento in cui le cose non vanno come previsto. Come funzioni quando non ti senti al massimo. Cosa scatta esattamente ogni volta che hai mollato.<br><br>
+      Ci vogliono 5 minuti. Quello che ricevi alla fine è scritto per te — non per chiunque voglia "stare meglio".</p>
+      <button class="btn" onclick="startQuiz()">Inizia →</button>
+    </div>`;
+}
+
+function renderQuestion(qId) {
+  const q = Q[qId];
+  const allQ = ['D1','D2','D3','D4', ...(BRANCH[state.profile||'A'])];
+  const qNum = allQ.indexOf(qId) + 1;
+  const progress = Math.round((qNum / 9) * 100);
+  const micro = q.microcopy ? `<div class="q-microcopy">${q.microcopy}</div>` : '';
+  const trans = q.transition ? `<div class="q-transition">${q.transition}</div>` : '';
+  const opts = q.type === 'open'
+    ? `<textarea class="q-textarea" id="openAnswer" placeholder="${q.placeholder||''}">${state.openAnswer}</textarea>
+       <button class="btn" onclick="submitOpen()">Continua →</button>`
+    : q.options.map((o,i) => `<button class="option" onclick="selectOption(this,'${qId}',${i})">${o.text}</button>`).join('');
+
+  app.innerHTML = `
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
+    <div class="progress-label">${qNum} / 9</div>
+    <div class="screen" style="justify-content:flex-start;padding-top:64px;">
+      ${micro}${trans}
+      <div class="q-text">${q.text}</div>
+      <div class="options">${opts}</div>
+    </div>`;
+}
+
+function renderContact() {
+  app.innerHTML = `
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:100%"></div></div>
+    <div class="screen" style="justify-content:flex-start;padding-top:64px;">
+      <div class="q-microcopy">Ci sei quasi.</div>
+      <h2 class="contact-title">Il tuo report è pronto.</h2>
+      <p class="contact-sub">Ho letto le tue risposte. C'è qualcosa di preciso che emerge — non è una valutazione generica.<br><br>
+      Lasciami il nome e la email e ti mando il report subito. Se aggiungi il WhatsApp, <em>ti scrivo io dopo</em> — non un sistema automatico, io.</p>
+      <div class="field"><label>Nome</label>
+        <input type="text" id="f-name" placeholder="Il tuo nome" value="${state.user.name}" autocomplete="given-name">
+      </div>
+      <div class="field"><label>Email</label>
+        <input type="email" id="f-email" placeholder="la.tua@email.com" value="${state.user.email}" autocomplete="email">
+      </div>
+      <div class="field optional"><label>WhatsApp</label>
+        <input type="tel" id="f-wa" placeholder="+39 333 000 0000" value="${state.user.whatsapp}">
+        <div class="field-note">Lasciami il numero — ti scrivo io dopo il report.</div>
+      </div>
+      <button class="btn" style="margin-top:8px" onclick="submitContact()">Ricevi il report →</button>
+      <p class="privacy-note">I tuoi dati non verranno condivisi con terze parti.</p>
+    </div>`;
+}
+
+function renderLoading() {
+  app.innerHTML = `
+    <div class="loading-screen">
+      <div class="loading-steps">
+        <div class="loading-step active" id="s0"><div class="step-dot"></div><span>Sto leggendo le tue risposte...</span></div>
+        <div class="loading-step" id="s1"><div class="step-dot"></div><span>Ho trovato il tuo schema...</span></div>
+        <div class="loading-step" id="s2"><div class="step-dot"></div><span>Sto preparando la tua analisi...</span></div>
+      </div>
+      <div class="loading-bar-wrap"><div class="loading-bar-fill" id="lb"></div></div>
+    </div>`;
+  const lb = document.getElementById('lb');
+  const s = [0,1,2].map(i => document.getElementById('s'+i));
+  setTimeout(()=>{ lb.style.width='35%'; s[0].className='loading-step done'; s[1].className='loading-step active'; }, 1200);
+  setTimeout(()=>{ lb.style.width='70%'; s[1].className='loading-step done'; s[2].className='loading-step active'; }, 2600);
+  setTimeout(()=>{ lb.style.width='100%'; s[2].className='loading-step done'; }, 3800);
+  setTimeout(()=>{ renderReport(); }, 4600);
+}
+
+function renderReport() {
+  const r = getReport(state.profile, state.user.name);
+  app.innerHTML = `
+    <div class="report-screen">
+      <div class="report-header">
+        <div class="report-header-inner">
+          <div class="report-badge">${r.badge}</div>
+          <h1 class="report-title">${r.title}</h1>
+        </div>
+      </div>
+      <div class="report-body">${r.body}</div>
+    </div>`;
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────
+// HANDLERS
+// ─────────────────────────────
+function startQuiz() { renderQuestion('D1'); }
+
+function selectOption(el, qId, i) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const opt = Q[qId].options[i];
+  state.answers[qId] = { text: opt.text, score: opt.score||null };
+  if (opt.score) state.scores[opt.score]++;
+  setTimeout(()=> advance(qId), 280);
+}
+
+function advance(qId) {
+  if (qId === 'D4') {
+    state.profile = assignProfile();
+    state.flow = ['intro','D1','D2','D3','D4',...BRANCH[state.profile],'CONTACT'];
+    renderQuestion(BRANCH[state.profile][0]);
+    return;
+  }
+  const idx = state.flow.indexOf(qId);
+  const next = state.flow[idx+1];
+  if (!next || next === 'CONTACT') { renderContact(); return; }
+  renderQuestion(next);
+}
+
+function submitOpen() {
+  const ta = document.getElementById('openAnswer');
+  state.openAnswer = ta ? ta.value : '';
+  state.answers['DA5'] = { text: state.openAnswer };
+  renderContact();
+}
+
+function submitContact() {
+  const name  = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const wa    = document.getElementById('f-wa').value.trim();
+  if (!name)  { document.getElementById('f-name').style.borderColor='var(--accent)'; document.getElementById('f-name').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('f-email').style.borderColor='var(--accent)'; document.getElementById('f-email').focus(); return; }
+  state.user = { name, email, whatsapp: wa };
+  sendToSheets();
+  renderLoading();
+}
+
+// ─────────────────────────────
+// INIT
+// ─────────────────────────────
+renderIntro();
+</script>
+</body>
+</html>
