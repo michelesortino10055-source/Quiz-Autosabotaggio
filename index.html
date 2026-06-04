@@ -87,6 +87,7 @@
   }
   .btn:hover { opacity: 0.9; }
   .btn:active { opacity: 0.85; transform: scale(0.98); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .q-microcopy {
     font-size: 12px; color: var(--accent-dark);
@@ -153,10 +154,73 @@
     content: ' — opzionale'; font-style: italic;
     text-transform: none; letter-spacing: 0; font-weight: 400;
   }
+
+  /* ── Consent blocks ───────────────────────── */
+  .consent-group { margin: 22px 0 8px; display: flex; flex-direction: column; gap: 14px; }
+  .consent-item {
+    display: flex; align-items: flex-start; gap: 11px;
+    background: var(--bg-card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+    transition: border-color 0.15s;
+  }
+  .consent-item.invalid { border-color: #DC2626; }
+  .consent-item input[type="checkbox"] {
+    width: 20px; height: 20px; min-width: 20px; margin-top: 1px;
+    accent-color: var(--accent); cursor: pointer;
+  }
+  .consent-item label {
+    font-size: 13px; line-height: 1.55; color: var(--text-muted); cursor: pointer;
+  }
+  .consent-item label .req { color: #DC2626; font-weight: 700; }
+  .consent-item a { color: var(--accent); font-weight: 600; }
+
   .privacy-note {
     font-size: 11px; color: #9CA3AF;
     text-align: center; margin-top: 14px; line-height: 1.5;
   }
+  .privacy-note a { color: #6B7280; }
+
+  /* ── Privacy modal ───────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(15, 23, 42, 0.55);
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 24px 16px; overflow-y: auto;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-box {
+    background: var(--bg); border-radius: var(--radius);
+    max-width: 640px; width: 100%; margin: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    position: relative; animation: fadeUp 0.25s ease;
+  }
+  .modal-close {
+    position: sticky; top: 0; float: right;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 50%; width: 34px; height: 34px;
+    font-size: 18px; line-height: 1; color: var(--text-muted);
+    cursor: pointer; margin: 12px 12px 0 0; z-index: 2;
+  }
+  .modal-close:hover { background: var(--bg-card); }
+  .modal-content { padding: 28px 28px 36px; }
+  .modal-content h1 { font-size: 22px; font-weight: 700; line-height: 1.25; margin-bottom: 6px; }
+  .modal-content .updated { font-size: 12px; color: #6B7280; margin-bottom: 24px; }
+  .modal-content h2 {
+    font-size: 16px; font-weight: 700; margin: 24px 0 8px;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .modal-content h2:first-of-type { border-top: none; padding-top: 0; }
+  .modal-content p { font-size: 13.5px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.65; }
+  .modal-content ul { margin: 0 0 10px 18px; }
+  .modal-content li { font-size: 13.5px; color: var(--text-muted); margin-bottom: 6px; line-height: 1.55; }
+  .modal-content strong { color: var(--text); font-weight: 600; }
+  .modal-content a { color: var(--accent); }
+  .modal-content table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 12.5px; }
+  .modal-content th, .modal-content td { text-align: left; padding: 8px 10px; border: 1px solid var(--border); vertical-align: top; }
+  .modal-content th { background: var(--bg-card); font-weight: 600; color: var(--text); }
+  .modal-content .ph { background: #FEF3C7; padding: 1px 5px; border-radius: 4px; font-weight: 600; color: #92400E; }
 
   .loading-screen {
     display: flex; flex-direction: column;
@@ -240,12 +304,84 @@
 </head>
 <body>
 <div id="app"></div>
+<div class="modal-overlay" id="privacy-modal" onclick="if(event.target===this) closePrivacy()"></div>
 <script>
 // ─────────────────────────────
 // CONFIG
 // ─────────────────────────────
 const WA_URL     = 'https://wa.me/393500036367?text=Ciao%20Michele%2C%20ho%20fatto%20il%20quiz%2C%20adesso%20voglio%20fare%20questa%20call%20insieme%20per%20uscire%20da%20questo%20loop%20una%20volta%20per%20tutte.';
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz4ovV5dBv6NuTI2xrlGDTB8iiDuWjF_aD5HQVNL0xzzPqVjDQax69dN7fOU1Z0dc3HXQ/exec';
+
+// Versione del testo di consenso: aggiornala ogni volta che cambi i testi sotto.
+// Serve come prova di QUALE testo l'utente ha accettato.
+const CONSENT_VERSION = 'v1-2026-06';
+
+// ─────────────────────────────
+// INFORMATIVA PRIVACY (mostrata nella modale)
+// ↓ Compila i campi evidenziati in giallo (.ph)
+// ─────────────────────────────
+const PRIVACY_HTML = `
+  <h1>Informativa sul trattamento dei dati personali</h1>
+  <p class="updated">Ai sensi degli artt. 13 e 14 del Reg. (UE) 2016/679 (GDPR) — Ultimo aggiornamento: 04/06/2026</p>
+
+  <p>Questa informativa descrive come trattiamo i dati che ci fornisci compilando il quiz e il modulo di contatto. Leggila prima di inviare i tuoi dati.</p>
+
+  <h2>1. Titolare del trattamento</h2>
+  <ul>
+    <li><strong>Nome:</strong> Michele Sortino</li>
+    <li><strong>P.IVA:</strong> 02177650898</li>
+    <li><strong>Email:</strong> michelesortino10055@gmail.com</li>
+    <li><strong>WhatsApp:</strong> +39 350 003 6367</li>
+  </ul>
+
+  <h2>2. Quali dati raccogliamo</h2>
+  <ul>
+    <li><strong>Dati di contatto:</strong> nome, email e, se lo fornisci, numero WhatsApp.</li>
+    <li><strong>Risposte al quiz:</strong> opzioni selezionate ed eventuale testo libero, usati per generare il report personalizzato.</li>
+    <li><strong>Dati del consenso:</strong> data e ora dell'invio e versione del testo accettato, per documentare il consenso prestato.</li>
+  </ul>
+  <p>Non chiediamo dati sanitari né diagnosi. Le risposte hanno finalità motivazionale e di orientamento, non costituiscono valutazione clinica.</p>
+
+  <h2>3. Finalità e basi giuridiche</h2>
+  <table>
+    <tr><th>Finalità</th><th>Base giuridica</th></tr>
+    <tr><td>Elaborare le risposte e inviarti via email il report richiesto</td><td>Misure precontrattuali / consenso — art. 6.1.b / 6.1.a</td></tr>
+    <tr><td>Ricontattarti via WhatsApp o email con proposte di servizi (marketing)</td><td>Consenso libero e revocabile — art. 6.1.a</td></tr>
+    <tr><td>Conservare la prova del consenso e adempiere a obblighi di legge</td><td>Obbligo legale / legittimo interesse — art. 6.1.c / 6.1.f</td></tr>
+  </table>
+  <p>Il consenso al marketing è <strong>facoltativo</strong>: ricevi il report anche senza prestarlo. Nome ed email sono invece indispensabili per inviarti il report.</p>
+
+  <h2>4. Strumenti e fornitori</h2>
+  <p>Trattiamo i dati con strumenti informatici e misure di sicurezza adeguate, avvalendoci di:</p>
+  <ul>
+    <li><strong>Google LLC</strong> (Sheets, Apps Script, invio email): archiviazione risposte e invio del report.</li>
+    <li><strong>Vercel Inc.</strong> e <strong>GitHub, Inc.</strong>: hosting del sito.</li>
+    <li><strong>Meta Platforms Ireland Ltd. (WhatsApp):</strong> solo se fornisci il numero e acconsenti al ricontatto.</li>
+  </ul>
+  <p>Con i fornitori che agiscono come responsabili è in essere (o sarà stipulato) un accordo ex art. 28 GDPR.</p>
+
+  <h2>5. Trasferimento extra-UE</h2>
+  <p>Alcuni fornitori (Google, Vercel, GitHub, Meta) possono trattare i dati fuori dallo Spazio Economico Europeo, es. negli USA, sulla base di <strong>Clausole Contrattuali Standard</strong> e/o adesione all'<strong>EU-U.S. Data Privacy Framework</strong>, che garantiscono protezione adeguata.</p>
+
+  <h2>6. Conservazione</h2>
+  <ul>
+    <li><strong>Dati per il report:</strong> per il tempo necessario all'erogazione del servizio.</li>
+    <li><strong>Dati per il marketing:</strong> fino a revoca del consenso e comunque non oltre <span class="ph">24 mesi</span> dall'ultimo contatto.</li>
+    <li><strong>Prova del consenso:</strong> per il tempo previsto dalla legge per la difesa di un diritto.</li>
+  </ul>
+
+  <h2>7. Comunicazione e diffusione</h2>
+  <p>I tuoi dati <strong>non vengono diffusi pubblicamente né venduti</strong>. Possono essere comunicati solo ai fornitori indicati al punto 4 e alle autorità competenti ove previsto dalla legge.</p>
+
+  <h2>8. I tuoi diritti</h2>
+  <p>Puoi esercitare in ogni momento i diritti degli artt. 15-22 GDPR: accesso, rettifica, cancellazione, limitazione, portabilità, opposizione al marketing e <strong>revoca del consenso</strong>. Scrivi all'email del Titolare (punto 1). Puoi inoltre proporre reclamo al <strong>Garante per la protezione dei dati personali</strong> (<a href="https://www.garanteprivacy.it" target="_blank">garanteprivacy.it</a>).</p>
+
+  <h2>9. Come revocare il consenso</h2>
+  <p>Revoca il consenso marketing in ogni momento scrivendo "CANCELLAMI" al numero WhatsApp +39 350 003 6367 o inviando una email al Titolare. La revoca è gratuita.</p>
+
+  <h2>10. Processo decisionale automatizzato</h2>
+  <p>Il quiz assegna un "profilo" tramite un semplice conteggio delle risposte, solo per personalizzare il report. Non produce effetti giuridici e non rientra nell'art. 22 GDPR.</p>
+`;
 
 // ─────────────────────────────
 // STATE
@@ -256,7 +392,8 @@ const state = {
   profile: null,
   answers: {},
   openAnswer: '',
-  user: { name:'', email:'', whatsapp:'' }
+  user: { name:'', email:'', whatsapp:'' },
+  consent: { privacy:false, marketing:false, timestamp:'', version:CONSENT_VERSION }
 };
 
 const BRANCH = {
@@ -557,12 +694,14 @@ function assignProfile() {
 }
 
 // ─────────────────────────────
-// GOOGLE SHEETS
+// GOOGLE SHEETS + EMAIL (Apps Script)
 // ─────────────────────────────
 function sendToSheets() {
   if (!SHEETS_URL) return;
   const br = BRANCH[state.profile] || [];
   const ba = br.map(id => state.answers[id] ? state.answers[id].text : '');
+  // Report da inviare via email: lo costruiamo qui e lo passiamo allo script.
+  const r = getReport(state.profile, state.user.name) || {};
   const params = new URLSearchParams({
     name: state.user.name, email: state.user.email,
     whatsapp: state.user.whatsapp, profile: state.profile || '',
@@ -570,7 +709,17 @@ function sendToSheets() {
     d3: state.answers['D3'] ? state.answers['D3'].text : '',
     d4: state.answers['D4'] ? state.answers['D4'].text : '',
     b1: ba[0]||'', b2: ba[1]||'', b3: ba[2]||'',
-    b4: ba[3]||'', b5: ba[4] || state.openAnswer || ''
+    b4: ba[3]||'', b5: ba[4] || state.openAnswer || '',
+    // ── Dati di consenso (prova GDPR) ──
+    consent_privacy: state.consent.privacy ? 'SI' : 'NO',
+    consent_marketing: state.consent.marketing ? 'SI' : 'NO',
+    consent_timestamp: state.consent.timestamp,
+    consent_version: state.consent.version,
+    page_url: location.href,
+    // ── Contenuto report per l'email ──
+    report_badge: r.badge || '',
+    report_title: r.title || '',
+    report_body: r.body || ''
   });
   fetch(SHEETS_URL, {
     method: 'POST', mode: 'no-cors',
@@ -625,7 +774,7 @@ function renderContact() {
       <div class="q-microcopy">Ci sei quasi.</div>
       <h2 class="contact-title">Il tuo report è pronto.</h2>
       <p class="contact-sub">Ho letto le tue risposte. C'è qualcosa di preciso che emerge — non è una valutazione generica.<br><br>
-      Lasciami il nome e la email e ti mando il report subito. Se aggiungi il WhatsApp, <em>ti scrivo io dopo</em> — non un sistema automatico, io.</p>
+      Lasciami il nome e la email e ti mando il report subito. Se aggiungi il WhatsApp e dai il consenso qui sotto, <em>ti scrivo io dopo</em> — non un sistema automatico, io.</p>
       <div class="field"><label>Nome</label>
         <input type="text" id="f-name" placeholder="Il tuo nome" value="${state.user.name}" autocomplete="given-name">
       </div>
@@ -634,10 +783,26 @@ function renderContact() {
       </div>
       <div class="field optional"><label>WhatsApp</label>
         <input type="tel" id="f-wa" placeholder="+39 333 000 0000" value="${state.user.whatsapp}">
-        <div class="field-note">Lasciami il numero — ti scrivo io dopo il report.</div>
+        <div class="field-note">Serve solo se vuoi che ti ricontatti io dopo il report.</div>
       </div>
-      <button class="btn" style="margin-top:8px" onclick="submitContact()">Ricevi il report →</button>
-      <p class="privacy-note">I tuoi dati non verranno condivisi con terze parti.</p>
+
+      <div class="consent-group">
+        <div class="consent-item" id="consent-privacy-box">
+          <input type="checkbox" id="c-privacy">
+          <label for="c-privacy">
+            <span class="req">*</span> Ho letto e compreso l'<a href="#" onclick="openPrivacy(event)">informativa privacy</a> e acconsento al trattamento dei miei dati per ricevere il report personalizzato via email.
+          </label>
+        </div>
+        <div class="consent-item">
+          <input type="checkbox" id="c-marketing">
+          <label for="c-marketing">
+            Acconsento a essere ricontattato/a via WhatsApp o email con proposte di consulenza e servizi (marketing diretto). <em>Facoltativo, revocabile in ogni momento.</em>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn" style="margin-top:14px" onclick="submitContact()">Ricevi il report →</button>
+      <p class="privacy-note">Titolare del trattamento: Michele Sortino. I tuoi dati non vengono venduti né diffusi. Dettagli e diritti nell'<a href="#" onclick="openPrivacy(event)">informativa privacy</a>.</p>
     </div>`;
 }
 
@@ -673,6 +838,28 @@ function renderReport() {
     </div>`;
   window.scrollTo(0,0);
 }
+
+// ─────────────────────────────
+// PRIVACY MODAL
+// ─────────────────────────────
+function openPrivacy(ev) {
+  if (ev) ev.preventDefault();
+  const m = document.getElementById('privacy-modal');
+  m.innerHTML = `
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Informativa privacy">
+      <button class="modal-close" onclick="closePrivacy()" aria-label="Chiudi">×</button>
+      <div class="modal-content">${PRIVACY_HTML}</div>
+    </div>`;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePrivacy() {
+  const m = document.getElementById('privacy-modal');
+  m.classList.remove('open');
+  m.innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePrivacy(); });
 
 // ─────────────────────────────
 // HANDLERS
@@ -712,9 +899,28 @@ function submitContact() {
   const name  = document.getElementById('f-name').value.trim();
   const email = document.getElementById('f-email').value.trim();
   const wa    = document.getElementById('f-wa').value.trim();
-  if (!name)  { document.getElementById('f-name').style.borderColor='var(--accent)'; document.getElementById('f-name').focus(); return; }
-  if (!email || !email.includes('@')) { document.getElementById('f-email').style.borderColor='var(--accent)'; document.getElementById('f-email').focus(); return; }
+  const cPrivacy   = document.getElementById('c-privacy').checked;
+  const cMarketing = document.getElementById('c-marketing').checked;
+
+  if (!name)  { document.getElementById('f-name').style.borderColor='#DC2626'; document.getElementById('f-name').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById('f-email').style.borderColor='#DC2626'; document.getElementById('f-email').focus(); return; }
+
+  // Consenso privacy OBBLIGATORIO per inviare i dati
+  const box = document.getElementById('consent-privacy-box');
+  if (!cPrivacy) {
+    box.classList.add('invalid');
+    box.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  box.classList.remove('invalid');
+
   state.user = { name, email, whatsapp: wa };
+  state.consent = {
+    privacy: cPrivacy,
+    marketing: cMarketing,
+    timestamp: new Date().toISOString(),
+    version: CONSENT_VERSION
+  };
   sendToSheets();
   renderLoading();
 }
