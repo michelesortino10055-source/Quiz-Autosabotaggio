@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Scopri cosa ti blocca — Quiz</title>
+<title>Scopri cosa ti blocca, Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -270,7 +270,7 @@
   .field input:focus { outline: none; border-color: var(--b-500); box-shadow:0 0 0 4px var(--accent-muted); }
   .field input::placeholder { color: #9CA3AF; }
   .field-note { font-size: 11px; color: #6B7280; margin-top: 5px; }
-  .field.optional label::after { content: ' — opzionale'; font-style: italic; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .field.optional label::after { content: ', opzionale'; font-style: italic; text-transform: none; letter-spacing: 0; font-weight: 400; }
 
   .consent-group { margin: 22px 0 8px; display: flex; flex-direction: column; gap: 14px; }
   .consent-item {
@@ -397,6 +397,47 @@
   .r-reveal{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
   .r-reveal.in{opacity:1;transform:none}
 
+  /* ===== report: fasi gamificate ===== */
+  .phase-stepper{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:26px}
+  .pstep{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:'Sora',sans-serif;
+    font-weight:800;font-size:13px;color:#9fb6e6;background:rgba(122,240,255,.06);
+    border:1.5px solid rgba(122,240,255,.28);transition:all .4s var(--ease)}
+  .pstep.active{color:#04213f;background:linear-gradient(120deg,var(--cyan-2),var(--b-400));border-color:transparent;
+    box-shadow:0 8px 22px rgba(79,214,255,.4);transform:scale(1.12)}
+  .pstep.done{color:#fff;background:linear-gradient(140deg,var(--b-500),var(--b-700));border-color:transparent}
+  .pline{width:26px;height:2px;border-radius:2px;background:rgba(122,240,255,.22);transition:background .4s var(--ease)}
+  .pline.done{background:linear-gradient(90deg,var(--b-500),var(--cyan))}
+
+  .report-phase{scroll-margin-top:14px}
+  .phase-locked{display:none}
+  .phase-unlocked{animation:phaseIn .75s var(--ease)}
+  @keyframes phaseIn{from{opacity:0;transform:translateY(30px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+
+  .phase-tag{display:inline-flex;align-items:center;gap:9px;font-family:'Sora',sans-serif;font-weight:800;
+    font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--b-600);margin-bottom:24px;
+    background:var(--accent-muted);padding:8px 15px;border-radius:100px}
+  .phase-tag .pt-dot{width:7px;height:7px;border-radius:50%;background:var(--b-500);box-shadow:0 0 10px var(--b-500)}
+
+  .phase-gate{position:relative;overflow:hidden;text-align:center;margin:44px 0 8px;padding:34px 26px;border-radius:24px;
+    background:linear-gradient(160deg,#fff,var(--paper-2));border:1.5px dashed rgba(47,107,255,.38);
+    box-shadow:0 18px 44px rgba(20,58,138,.10)}
+  .phase-gate.gate-done{display:none}
+  .gate-reward{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;color:#0f9d58;background:rgba(16,163,74,.08);padding:7px 14px;border-radius:100px;margin-bottom:16px}
+  .gate-teaser{font-size:15.5px;line-height:1.62;color:var(--text-muted);max-width:430px;margin:0 auto 24px}
+  .gate-teaser strong{color:var(--text);font-weight:700}
+  .phase-unlock-btn{appearance:none;border:0;cursor:pointer;position:relative;overflow:hidden;font-family:'Inter',sans-serif;
+    font-weight:800;font-size:16px;padding:17px 34px;border-radius:100px;display:inline-flex;align-items:center;gap:11px;
+    background:linear-gradient(120deg,var(--b-500),var(--b-700));color:#fff;
+    box-shadow:0 14px 34px rgba(29,78,216,.34), inset 0 1px 0 rgba(255,255,255,.18);
+    transition:transform .22s var(--ease),box-shadow .25s var(--ease)}
+  .phase-unlock-btn::after{content:"";position:absolute;top:0;left:-120%;width:55%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg)}
+  .phase-unlock-btn:hover::after{animation:shine .9s var(--ease)}
+  .phase-unlock-btn:hover{transform:translateY(-3px);box-shadow:0 22px 50px rgba(29,78,216,.46)}
+  .phase-unlock-btn .lock{font-size:16px}
+  .gate-progress{margin-top:15px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9fb6e6;font-weight:700}
+
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     .land-word,.land-reveal,.land-fade,.r-reveal{opacity:1!important;transform:none!important;filter:none!important}
@@ -431,7 +472,7 @@ const CONSENT_VERSION = 'v1-2026-06';
 // ─────────────────────────────
 const PRIVACY_HTML = `
   <h1>Informativa sul trattamento dei dati personali</h1>
-  <p class="updated">Ai sensi degli artt. 13 e 14 del Reg. (UE) 2016/679 (GDPR) — Ultimo aggiornamento: 04/06/2026</p>
+  <p class="updated">Ai sensi degli artt. 13 e 14 del Reg. (UE) 2016/679 (GDPR). Ultimo aggiornamento: 04/06/2026</p>
 
   <p>Questa informativa descrive come trattiamo i dati che ci fornisci compilando il quiz e il modulo di contatto. Leggila prima di inviare i tuoi dati.</p>
 
@@ -454,9 +495,9 @@ const PRIVACY_HTML = `
   <h2>3. Finalità e basi giuridiche</h2>
   <table>
     <tr><th>Finalità</th><th>Base giuridica</th></tr>
-    <tr><td>Elaborare le risposte e inviarti via email il report richiesto</td><td>Misure precontrattuali / consenso — art. 6.1.b / 6.1.a</td></tr>
-    <tr><td>Ricontattarti via WhatsApp o email con proposte di servizi (marketing)</td><td>Consenso libero e revocabile — art. 6.1.a</td></tr>
-    <tr><td>Conservare la prova del consenso e adempiere a obblighi di legge</td><td>Obbligo legale / legittimo interesse — art. 6.1.c / 6.1.f</td></tr>
+    <tr><td>Elaborare le risposte e inviarti via email il report richiesto</td><td>Misure precontrattuali / consenso, art. 6.1.b / 6.1.a</td></tr>
+    <tr><td>Ricontattarti via WhatsApp o email con proposte di servizi (marketing)</td><td>Consenso libero e revocabile, art. 6.1.a</td></tr>
+    <tr><td>Conservare la prova del consenso e adempiere a obblighi di legge</td><td>Obbligo legale / legittimo interesse, art. 6.1.c / 6.1.f</td></tr>
   </table>
   <p>Il consenso al marketing è <strong>facoltativo</strong>: ricevi il report anche senza prestarlo. Nome ed email sono invece indispensabili per inviarti il report.</p>
 
@@ -517,11 +558,11 @@ const BRANCH = {
 const Q = {
   D1: {
     microcopy: null, transition: null,
-    text: "Quante volte negli ultimi anni hai detto 'da lunedì inizio' — e quel lunedì non è mai arrivato?",
+    text: "Quante volte negli ultimi anni hai detto 'da lunedì inizio', e quel lunedì non è mai arrivato?",
     options: [
       {text:'Una o due volte'},
       {text:'Tre o cinque volte'},
-      {text:'Più di cinque — ma al lunedì non sono mai arrivato'},
+      {text:'Più di cinque, ma al lunedì non sono mai arrivato'},
       {text:'Ho smesso di contare'}
     ]
   },
@@ -530,9 +571,9 @@ const Q = {
     transition: null,
     text: 'Quando decidi che stavolta inizi davvero, cosa succede nei giorni successivi?',
     options: [
-      {text:'Comincio a cercare il metodo giusto, il momento giusto, le condizioni giuste — e non parto', score:'A'},
+      {text:'Comincio a cercare il metodo giusto, il momento giusto, le condizioni giuste, e non parto', score:'A'},
       {text:'Parto bene, poi basta un errore e torno al punto di partenza', score:'B'},
-      {text:'Dipende da come mi sento — quando sono in forma mentale volo, quando non lo sono scompaio', score:'C'}
+      {text:'Dipende da come mi sento, quando sono in forma mentale volo, quando non lo sono scompaio', score:'C'}
     ]
   },
   D3: {
@@ -542,7 +583,7 @@ const Q = {
     options: [
       {text:'Non era ancora il momento giusto / dovevo capire ancora qualcosa', score:'A'},
       {text:'Ho sbagliato qualcosa e da lì è crollato tutto', score:'B'},
-      {text:"Non me la sono raccontata — sono fatto così, lo so già", score:'C'}
+      {text:"Non me la sono raccontata, sono fatto così, lo so già", score:'C'}
     ]
   },
   D4: {
@@ -557,12 +598,12 @@ const Q = {
   },
   DA1: {
     microcopy: null,
-    transition: 'Già. Non è che non vuoi — è che aspetti sempre che qualcosa si allinei prima.',
+    transition: 'Già. Non è che non vuoi, è che aspetti sempre che qualcosa si allinei prima.',
     text: "Qual è la scusa che usi più spesso? Quella che sai già che useresti anche stavolta.",
     options: [
       {text:'"Aspetto che finisca questo periodo di casino"'},
       {text:'"Voglio capire ancora questo / finire ancora quello"'},
-      {text:'"Non mi sento ancora pronto — quando sono pronto parto"'},
+      {text:'"Non mi sento ancora pronto, quando sono pronto parto"'},
       {text:'"Da lunedì inizio sul serio"'}
     ]
   },
@@ -570,30 +611,30 @@ const Q = {
     microcopy: null, transition: null,
     text: "Quante volte ti è capitato di avere il piano perfetto in testa e non partire comunque?",
     options: [
-      {text:'Quasi mai — quando ho il piano, parto'},
+      {text:'Quasi mai, quando ho il piano, parto'},
       {text:'Qualche volta'},
-      {text:"Spesso — il piano c'è ma l'azione no"},
-      {text:'Sempre — più il piano è preciso, meno riesco a iniziare'}
+      {text:"Spesso, il piano c'è ma l'azione no"},
+      {text:'Sempre, più il piano è preciso, meno riesco a iniziare'}
     ]
   },
   DA3: {
     microcopy: 'Non sto raccogliendo risposte a caso.', transition: null,
-    text: "Se qualcuno costruisse il percorso per te — senza che tu debba scegliere niente — pensi che partiresti?",
+    text: "Se qualcuno costruisse il percorso per te, senza che tu debba scegliere niente, pensi che partiresti?",
     options: [
       {text:'Sì, probabilmente sì'},
-      {text:'Forse — ma troverei un altro problema'},
+      {text:'Forse, ma troverei un altro problema'},
       {text:'Non lo so'},
-      {text:"Onestamente no — c'è sempre qualcosa che non va"}
+      {text:"Onestamente no, c'è sempre qualcosa che non va"}
     ]
   },
   DA4: {
     microcopy: null, transition: null,
     text: "Sai già come va a finire se ci provi da solo ancora una volta?",
     options: [
-      {text:'No — questa volta è diverso'},
+      {text:'No, questa volta è diverso'},
       {text:'Probabilmente sì, ma non voglio ammetterlo'},
       {text:'Sì, e fa schifo ammetterlo'},
-      {text:'Sì — è per questo che sono qui'}
+      {text:'Sì, è per questo che sono qui'}
     ]
   },
   DA5: {
@@ -603,23 +644,23 @@ const Q = {
   },
   DB1: {
     microcopy: null,
-    transition: 'Capito. Non è partire il problema — quello lo sai fare. È quello che succede dopo il primo errore.',
+    transition: 'Capito. Non è partire il problema, quello lo sai fare. È quello che succede dopo il primo errore.',
     text: "Quando sgarri su cibo o allenamento, cosa succede subito dopo?",
     options: [
       {text:'Recupero e vado avanti senza pensarci'},
       {text:'Mi sento in colpa ma continuo lo stesso'},
-      {text:'Scatta qualcosa di automatico — finisco per esagerare ancora di più'},
-      {text:"'Ormai ho rovinato tutto' — e smetto"}
+      {text:'Scatta qualcosa di automatico, finisco per esagerare ancora di più'},
+      {text:"'Ormai ho rovinato tutto', e smetto"}
     ]
   },
   DB2: {
     microcopy: null, transition: null,
-    text: "Ti è mai capitato di mangiare qualcosa 'fuori piano' e finire per mangiare molto di più — come se ormai tanto valesse?",
+    text: "Ti è mai capitato di mangiare qualcosa 'fuori piano' e finire per mangiare molto di più, come se ormai tanto valesse?",
     options: [
       {text:'No, riesco a fermarmi'},
       {text:'A volte sì'},
-      {text:"Spesso — è come se si aprisse uno sportello"},
-      {text:'Sempre — basta uno sgarro e parte il meccanismo'}
+      {text:"Spesso, è come se si aprisse uno sportello"},
+      {text:'Sempre, basta uno sgarro e parte il meccanismo'}
     ]
   },
   DB3: {
@@ -628,7 +669,7 @@ const Q = {
     options: [
       {text:'"Tanto sono fatto così"'},
       {text:'"Da lunedì si ricomincia da capo"'},
-      {text:'"Mi sento uno schifo — ma domani torno in carreggiata"'},
+      {text:'"Mi sento uno schifo, ma domani torno in carreggiata"'},
       {text:'"Non ho la forza di volontà degli altri"'}
     ]
   },
@@ -639,25 +680,25 @@ const Q = {
       {text:'Pochi giorni'},
       {text:'Una o due settimane'},
       {text:'Un mese o più'},
-      {text:'Anche mesi — il problema non è partire, è non mollare dopo il primo errore'}
+      {text:'Anche mesi, il problema non è partire, è non mollare dopo il primo errore'}
     ]
   },
   DB5: {
     microcopy: null, transition: null,
-    text: "Se avessi qualcuno con cui confrontarti ogni giorno — qualcuno che vede cosa fai — cambierebbe qualcosa per te?",
+    text: "Se avessi qualcuno con cui confrontarti ogni giorno, qualcuno che vede cosa fai, cambierebbe qualcosa per te?",
     options: [
-      {text:'Sì — sapere che qualcuno vede cambia il mio comportamento'},
-      {text:'Forse — dipende da come lo fa, non voglio sentirmi giudicato'},
-      {text:"Non lo so — non l'ho mai provato davvero"},
-      {text:'Probabilmente no — il problema è mio'}
+      {text:'Sì, sapere che qualcuno vede cambia il mio comportamento'},
+      {text:'Forse, dipende da come lo fa, non voglio sentirmi giudicato'},
+      {text:"Non lo so, non l'ho mai provato davvero"},
+      {text:'Probabilmente no, il problema è mio'}
     ]
   },
   DC1: {
     microcopy: null,
-    transition: 'Quando sei on, sei inarrestabile. Il problema è il resto — e lo sai già.',
+    transition: 'Quando sei on, sei inarrestabile. Il problema è il resto, e lo sai già.',
     text: "Quando sei 'on', quanto dura di solito prima che si spenga?",
     options: [
-      {text:'Qualche giorno — mi accendo e spengo veloce'},
+      {text:'Qualche giorno, mi accendo e spengo veloce'},
       {text:'Una o due settimane'},
       {text:'Un mese o più, poi crolla tutto'},
       {text:"Dipende da cos'altro sta succedendo nella mia vita"}
@@ -668,8 +709,8 @@ const Q = {
     text: "Cosa deve succedere fuori di te per farti sparire da un percorso?",
     options: [
       {text:'Qualcosa va storto al lavoro o in un rapporto'},
-      {text:'Un calo di energie — stress, sonno, periodo pesante'},
-      {text:'Niente di preciso — la motivazione si esaurisce da sola'},
+      {text:'Un calo di energie, stress, sonno, periodo pesante'},
+      {text:'Niente di preciso, la motivazione si esaurisce da sola'},
       {text:'Basta che le cose smettano di andare bene'}
     ]
   },
@@ -680,14 +721,14 @@ const Q = {
       {text:'Qualche giorno'},
       {text:'Una o due settimane'},
       {text:'Un mese o più'},
-      {text:'A volte non torno — aspetto che riparta tutto'}
+      {text:'A volte non torno, aspetto che riparta tutto'}
     ]
   },
   DC4: {
     microcopy: null, transition: null,
-    text: "Quante volte hai aspettato di sentirti 'nella testa giusta' per iniziare — e quel momento non è mai arrivato?",
+    text: "Quante volte hai aspettato di sentirti 'nella testa giusta' per iniziare, e quel momento non è mai arrivato?",
     options: [
-      {text:'Mai — quando sono pronto parto'},
+      {text:'Mai, quando sono pronto parto'},
       {text:'Qualche volta'},
       {text:'Spesso'},
       {text:'Praticamente sempre'}
@@ -695,10 +736,10 @@ const Q = {
   },
   DC5: {
     microcopy: null, transition: null,
-    text: "Se qualcuno ti scrivesse ogni giorno per tenerti nel percorso anche quando non te la senti — ti aiuterebbe o ti darebbe fastidio?",
+    text: "Se qualcuno ti scrivesse ogni giorno per tenerti nel percorso anche quando non te la senti, ti aiuterebbe o ti darebbe fastidio?",
     options: [
-      {text:'Mi aiuterebbe — è esattamente quello che mi serve'},
-      {text:'Dipende da come lo fa — non voglio sentirmi controllato'},
+      {text:'Mi aiuterebbe, è esattamente quello che mi serve'},
+      {text:'Dipende da come lo fa, non voglio sentirmi controllato'},
       {text:'Non lo so'},
       {text:'Probabilmente mi darebbe fastidio'}
     ]
@@ -715,6 +756,9 @@ function getReport(profile, name) {
       badge: 'Il Da Lunedì',
       title: `${n}, da lunedì… vero?`,
       body: `
+        <section class="report-phase" id="phase-1" data-phase="1">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 1 di 3 · Chi sei davvero</div>
+        <div class="phase-content">
         <div class="report-section">
           <p class="report-p">Lo sai già… Non ti sto dicendo niente di nuovo.</p>
           <p class="report-p">Sai che dovresti iniziare. Sai che continuare a rimandare non ti porterà da nessuna parte. Sai che il tuo corpo non cambierà semplicemente perché hai guardato altri video, salvato un altro allenamento o letto l’ennesimo articolo su quale sia il metodo migliore per dimagrire, aumentare la massa muscolare o tornare finalmente in forma.</p>
@@ -737,12 +781,24 @@ function getReport(profile, name) {
           <p class="report-p">Poi il lunedì successivo. Poi il mese nuovo.</p>
           <p class="report-p">E ogni tentativo lasciato a metà ha aggiunto un piccolo pezzo a una storia che ormai ti racconti quasi automaticamente: “Io non sono costante”, “Inizio sempre e poi mollo”, “Non riesco a seguire nulla fino in fondo”, “Forse non sono fatto per questo”.</p>
         </div>
-        <div class="report-divider"></div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-2" data-phase="2">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 2 di 3 · Il meccanismo che ti autosabota</div>
+        <div class="phase-content">
         <div class="report-section">
           <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">Quello che ti ho descritto qui sopra non è un difetto del tuo carattere. È uno schema, un automatismo che hai ripetuto così tante volte da non vederlo più.</p>
           <p class="report-p">Il problema è che questo pattern, continuato nel tempo, tende a cementificarsi dentro di te, diventando una vera e propria parte di te che esce non solo nel fitness, ma anche in altre aree della tua vita.</p>
           <p class="report-p">Ed è proprio questo il punto del mio aiuto.</p>
         </div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-3" data-phase="3">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 3 di 3 · La via d'uscita</div>
+        <div class="phase-content">
+        <div class="report-quote">E se non cambi nulla, tra un anno sarai esattamente qui.</div>
+        <p class="report-p">Stesso punto, stesse parole, stessa promessa spostata al prossimo lunedì. Quello che rischi davvero non sono qualche mese di palestra: è un altro pezzo di fiducia in te stesso, di quelli che poi ti porti dietro ovunque.</p>
         <div class="report-highlight">
           <p><strong>Non voglio consegnarti l’ennesima scheda generica e lasciarti solo a capire come inserirla nella tua vita.</strong> Non voglio darti un piano perfetto sulla carta ma impossibile da seguire nella realtà. Perché un programma non funziona solo quando è scientificamente corretto, bensì quando riesci davvero a portarlo avanti nella tua routine, con i tuoi orari, i tuoi impegni, le tue difficoltà e le giornate in cui le cose non vanno come previsto.</p>
           <p>Costruito partendo dalla tua vita, dal lavoro che fai, dagli orari che hai, da quanto tempo puoi realmente dedicare all’allenamento. Dalla tua esperienza, da quello che riesci a mangiare, dagli ostacoli che ti hanno fatto mollare in passato.</p>
@@ -751,12 +807,17 @@ function getReport(profile, name) {
         <div class="report-cta-block">
           <p>Se ti sei riconosciuto in queste parole, probabilmente non hai bisogno di un altro contenuto da salvare per dopo. Devi solo fare l’azione giusta per iniziare e uscire da questa maledetta paralisi decisionale che ti affligge.<br><br>Raccontami qual è il punto in cui continui a bloccarti, cosa hai già provato e cosa ti ha fatto mollare le altre volte. Voglio capire la tua situazione e vedere, con onestà, se ha senso lavorare insieme.</p>
           <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
-        </div>`
+        </div>
+        </div>
+        </section>`
     },
     B: {
       badge: 'Il Tutto o Niente',
       title: `${n}, un biscotto. E poi tutto è crollato.`,
       body: `
+        <section class="report-phase" id="phase-1" data-phase="1">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 1 di 3 · Chi sei davvero</div>
+        <div class="phase-content">
         <div class="report-section">
           <p class="report-p">Lo so già com’è andata… Sei partito bene, forse persino meglio di quanto ti aspettassi.</p>
           <p class="report-p">Hai iniziato con entusiasmo, hai seguito il piano con precisione, hai pesato gli alimenti, rispettato gli orari, completato gli allenamenti e controllato ogni dettaglio. Per qualche giorno, qualche settimana o magari anche per qualche mese hai avuto la sensazione di migliorare finalmente.</p>
@@ -774,12 +835,24 @@ function getReport(profile, name) {
           <p class="report-p">Per te il percorso sembra avere valore soltanto quando riesci a seguirlo senza sbavature. Finché rispetti tutto, senti di essere la persona che vuoi diventare. Ma appena esci dal piano, anche soltanto di poco, si sgretola quella percezione.</p>
           <p class="report-p">Ti senti incoerente, debole, incapace di mantenere l’ennesima promessa fatta a te stesso. E invece di tollerare quel disagio e andare avanti, inizi a spingere nella direzione opposta. Mangi ancora, salti ancora, ti lasci andare ancora di più.</p>
         </div>
-        <div class="report-divider"></div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-2" data-phase="2">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 2 di 3 · Il meccanismo che ti autosabota</div>
+        <div class="phase-content">
         <div class="report-section">
           <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">Quello che ti ho descritto qui sopra non è un difetto del tuo carattere. È uno schema, un automatismo che hai ripetuto così tante volte da non vederlo più.</p>
           <p class="report-p">Il problema è che questo pattern, continuato nel tempo, tende a cementificarsi dentro di te, diventando una vera e propria parte di te che esce non solo nel fitness, ma anche in altre aree della tua vita.</p>
           <p class="report-p">Ed è proprio questo il punto del mio aiuto.</p>
         </div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-3" data-phase="3">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 3 di 3 · La via d'uscita</div>
+        <div class="phase-content">
+        <div class="report-quote">E se non cambi nulla, tra un anno sarai esattamente qui.</div>
+        <p class="report-p">Stesso punto, stesse parole, stessa promessa spostata al prossimo lunedì. Quello che rischi davvero non sono qualche mese di palestra: è un altro pezzo di fiducia in te stesso, di quelli che poi ti porti dietro ovunque.</p>
         <div class="report-highlight">
           <p><strong>Non voglio consegnarti l’ennesima scheda generica e lasciarti solo a capire come inserirla nella tua vita.</strong> Non voglio darti un piano perfetto sulla carta ma impossibile da seguire nella realtà. Perché un programma non funziona solo quando è scientificamente corretto, bensì quando riesci davvero a portarlo avanti nella tua routine, con i tuoi orari, i tuoi impegni, le tue difficoltà e le giornate in cui le cose non vanno come previsto.</p>
           <p>Costruito partendo dalla tua vita, dal lavoro che fai, dagli orari che hai, da quanto tempo puoi realmente dedicare all’allenamento. Dalla tua esperienza, da quello che riesci a mangiare, dagli ostacoli che ti hanno fatto mollare in passato.</p>
@@ -788,12 +861,17 @@ function getReport(profile, name) {
         <div class="report-cta-block">
           <p>Se ti sei riconosciuto in queste parole, probabilmente non hai bisogno di punirti un’altra volta per un biscotto. Devi solo fare l’azione giusta per iniziare ad essere più malleabile e flessibile nel percorso, capendo che un errore nel tempo non condiziona un percorso solido di base.<br><br>Raccontami qual è il punto in cui continui a bloccarti, cosa hai già provato e cosa ti ha fatto mollare le altre volte. Voglio capire la tua situazione e vedere, con onestà, se ha senso lavorare insieme.</p>
           <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
-        </div>`
+        </div>
+        </div>
+        </section>`
     },
     C: {
       badge: 'Il Petardo',
       title: `${n}, quando sei on sei inarrestabile. Il problema è il resto.`,
       body: `
+        <section class="report-phase" id="phase-1" data-phase="1">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 1 di 3 · Chi sei davvero</div>
+        <div class="phase-content">
         <div class="report-section">
           <p class="report-p">Lo sappiamo entrambi che non è un problema di azione, il tuo, perché ogni volta che attraversi un buon periodo i risultati li ottieni pure.</p>
           <p class="report-p">Quando sei carico, quando ti senti ottimista, quando il lavoro gira, dormi bene, hai meno pensieri e ti sembra di avere finalmente la testa libera, diventi una persona diversa. Ti alleni con costanza, mangi meglio, organizzi le giornate, rispetti gli impegni e riesci a fare senza troppe difficoltà tutte quelle cose che, nei periodi peggiori, ti sembrano impossibili.</p>
@@ -809,12 +887,24 @@ function getReport(profile, name) {
           <div class="report-quote">“Io sono fatto così.”</div>
           <p class="report-p">Quando decidi di ripartire, una parte di te è motivata, ma l’altra già sa come finirà. Ti tiene con i piedi per terra e ti dice di non esaltarti troppo, perché è già successo in passato e ti ricapiterà, come una profezia che si autoavvera.</p>
         </div>
-        <div class="report-divider"></div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-2" data-phase="2">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 2 di 3 · Il meccanismo che ti autosabota</div>
+        <div class="phase-content">
         <div class="report-section">
           <div class="report-section-label">Cosa sta succedendo davvero</div>
+          <p class="report-p">Quello che ti ho descritto qui sopra non è un difetto del tuo carattere. È uno schema, un automatismo che hai ripetuto così tante volte da non vederlo più.</p>
           <p class="report-p">Il problema è che questo pattern, continuato nel tempo, tende a cementificarsi dentro di te, diventando una vera e propria parte di te che esce non solo nel fitness, ma anche in altre aree della tua vita.</p>
           <p class="report-p">Ed è proprio questo il punto del mio aiuto.</p>
         </div>
+        </div>
+        </section>
+        <section class="report-phase phase-locked" id="phase-3" data-phase="3">
+        <div class="phase-tag"><span class="pt-dot"></span>Fase 3 di 3 · La via d'uscita</div>
+        <div class="phase-content">
+        <div class="report-quote">E se non cambi nulla, tra un anno sarai esattamente qui.</div>
+        <p class="report-p">Stesso punto, stesse parole, stessa promessa spostata al prossimo lunedì. Quello che rischi davvero non sono qualche mese di palestra: è un altro pezzo di fiducia in te stesso, di quelli che poi ti porti dietro ovunque.</p>
         <div class="report-highlight">
           <p><strong>Non voglio consegnarti l’ennesima scheda generica e lasciarti solo a capire come inserirla nella tua vita.</strong> Non voglio darti un piano perfetto sulla carta ma impossibile da seguire nella realtà. Perché un programma non funziona solo quando è scientificamente corretto, bensì quando riesci davvero a portarlo avanti nella tua routine, con i tuoi orari, i tuoi impegni, le tue difficoltà e le giornate in cui le cose non vanno come previsto.</p>
           <p>Costruito partendo dalla tua vita, dal lavoro che fai, dagli orari che hai, da quanto tempo puoi realmente dedicare all’allenamento. Dalla tua esperienza, da quello che riesci a mangiare, dagli ostacoli che ti hanno fatto mollare in passato.</p>
@@ -823,7 +913,9 @@ function getReport(profile, name) {
         <div class="report-cta-block">
           <p>Se ti sei riconosciuto in queste parole, probabilmente non hai bisogno di cavalcare sempre l’onda per portare a termine qualcosa. Devi solo continuare a fare l’azione giusta e diventare più antifragile a ciò che ti ostacola.<br><br>Raccontami qual è il punto in cui continui a bloccarti, cosa hai già provato e cosa ti ha fatto mollare le altre volte. Voglio capire la tua situazione e vedere, con onestà, se ha senso lavorare insieme.</p>
           <a class="btn" href="${WA_URL}" target="_blank">Scrivimi su WhatsApp →</a>
-        </div>`
+        </div>
+        </div>
+        </section>`
     }
   };
   return reports[profile];
@@ -919,17 +1011,17 @@ function renderIntro() {
         <div class="land-sec land-fade">
           <div class="land-sec-label"><span class="num">1</span>Il copione che si ripete</div>
           <p>Inizi con una motivazione altissima, tanto che dentro di te sai già che questa volta è diverso. Hai il programma, hai la strategia, hai anche acquistato le scarpe nuove e le polsiere per spingere di più sulla panca.</p>
-          <p>Le prime due settimane vanno bene — forse anche tre. Poi succede qualcosa. Non è necessariamente un evento grande: una settimana di lavoro intensa, una cena fuori, un giorno in cui non ti senti al massimo. E lì, in quel momento preciso, scatta qualcosa nella tua testa. Una voce. Razionale. Convincente.</p>
+          <p>Le prime due settimane vanno bene, forse anche tre… Poi succede qualcosa. Non è necessariamente un evento grande: una settimana di lavoro intensa, una cena fuori, un giorno in cui non ti senti al massimo e lì, in quel momento preciso, scatta qualcosa nella tua testa. Inizi a sentire una voce di sottofondo molto razionale e convincente:</p>
           <div class="land-voice">
             <p>"Ha senso ricominciare a metà settimana?"</p>
             <p>"Tanto ormai ho perso il ritmo."</p>
             <p>"Aspetto lunedì e riparto sul serio."</p>
           </div>
           <p>E il lunedì non arriva mai nello stesso modo in cui era arrivato la prima volta.</p>
-          <p>Quello che vivi non è né mancanza di disciplina né pigrizia. Non è nemmeno che "non sei fatto per questo". È un <strong>meccanismo preciso</strong> — un pattern che si attiva ogni volta nello stesso punto, con le stesse parole, con la stessa sensazione di partire carichi e finire a zero.</p>
-          <p>E la parte più sottile di tutto questo è che quel meccanismo ti sembra logico. Ti sembra intelligente. Ti convince ogni volta che la scelta giusta sia smettere o aspettare di rimetterti in carreggiata.</p>
+          <p>Questo perché quello che vivi, cioè un <strong>meccanismo preciso</strong> che si è instaurato negli anni dentro di te, ti fa credere di essere pigro o senza disciplina, con conseguente ciclo di inizio e interruzione che si ripete ogni settimana.</p>
+          <p>E la parte più infima di tutto questo è che quel meccanismo ti sembra logico, ti sembra intelligente e ti convince ogni volta che la scelta giusta sia smettere o aspettare di rimetterti in carreggiata.</p>
           <p>Te lo anticipo io qual è il problema: <strong>quanto velocemente quella voce riesce a farti credere che rimandare sia la scelta più sensata.</strong> E questo ti fa sentire bene nel breve periodo, ovvero nelle ore successive…</p>
-          <p>Ma ora mi tocca farti una domanda scomoda.</p>
+          <p>Ma ora in qualità di Fitness Coach e potenzialmente anche il tuo, mi tocca farti una domanda scomoda.</p>
           <div class="land-pull">Quante altre cose hai rimandato usando le stesse parole?</div>
         </div>
 
@@ -937,11 +1029,11 @@ function renderIntro() {
 
         <div class="land-sec land-fade">
           <div class="land-sec-label"><span class="num">2</span>Quello che si accumula</div>
-          <p>C'è una cosa che è invisibile ai nostri occhi ma non al nostro cervello. Quando smettiamo di fare quello che ci siamo promessi che avremmo fatto, qualcosa cambia nel modo in cui ci percepiamo. Non è immediato: si accumula piano piano nel tempo, come la polvere.</p>
-          <p>Si accumula ogni volta che guardi lo specchio e vedi la distanza tra chi sei e chi hai detto che saresti diventato. Si accumula nel modo in cui parli di te agli altri — quella piccola esitazione quando qualcuno ti chiede come stai andando. Si accumula nella relazione che hai con chi ti sta vicino, perché è difficile essere pienamente presenti quando sei in guerra con te stesso su qualcosa che sembrava così semplice da fare.</p>
-          <p>La coerenza nel fitness non è una questione estetica. È la differenza tra una persona che si fida di se stessa e una che ha imparato, nel tempo, a <strong>non farlo del tutto</strong>.</p>
-          <p>È la base da cui parte tutto il resto — la sicurezza che metti nelle decisioni, il modo in cui ti relazioni, quanto spazio ti concedi di occupare nella tua vita e in quella degli altri.</p>
-          <p>Questo quiz non ti chiede quante volte ti sei allenato. Lo scopo è capire in modo <strong>chirurgico</strong> come funzioni. Qual è il tuo pattern specifico, il meccanismo preciso che si attiva ogni volta che molli. Perché non esiste un solo tipo di autosabotaggio: esistono dinamiche diverse, con radici diverse, e quello che blocca una persona non è lo stesso che blocca un'altra. Capirlo è il primo passo per smettere di ricominciare ogni volta e continuare a perdere tempo ed energie.</p>
+          <p>C'è una cosa invisibile ai nostri occhi ma non di certo al nostro cervello, ovvero quando smettiamo di fare quello che ci siamo promessi che avremmo fatto, qualcosa cambia nel modo in cui ci percepiamo. Come un bicchiere di vetro inizi a creparti, ma non in modo immediato: si accumula piano piano nel tempo.</p>
+          <p>Si accumula ogni volta che guardi lo specchio e vedi la distanza tra chi sei e chi hai detto che saresti diventato. Si accumula nel modo in cui parli di te agli altri, in quella piccola esitazione quando qualcuno ti chiede come stai andando. Si accumula nella relazione che hai con chi ti sta vicino, perché è difficile essere pienamente presenti quando sei in guerra con te stesso su qualcosa che sembrava così semplice da fare.</p>
+          <p>La coerenza nel Fitness non è una questione estetica. È la differenza tra una persona che si fida di se stessa e una che ha imparato, nel tempo, a <strong>non farlo del tutto</strong>.</p>
+          <p>È la base da cui poi riesci a costruire tutto il resto: dalla sicurezza che metti nelle decisioni, dal modo in cui ti relazioni, a quanto spazio ti concedi di occupare nella tua vita e in quella degli altri.</p>
+          <p>Questo quiz non ti chiede quante volte ti sei allenato bensì lo scopo è capire in modo <strong>chirurgico</strong> come funzioni. Qual è il tuo pattern specifico, il meccanismo preciso che si attiva ogni volta che molli. Perché non esiste un solo tipo di autosabotaggio: esistono dinamiche diverse, con radici diverse, e quello che blocca una persona non è lo stesso che blocca un'altra. Capirlo è il primo passo per smettere di ricominciare ogni volta e continuare a perdere tempo ed energie.</p>
           <p>Perché alla fine riceverai <strong>un'analisi scritta su come funzioni tu</strong>, non su come funziona "chiunque voglia stare meglio".</p>
         </div>
 
@@ -1047,8 +1139,8 @@ function renderContact() {
     <div class="screen" style="justify-content:flex-start;padding-top:72px;">
       <div class="q-microcopy">Ci sei quasi.</div>
       <h2 class="contact-title">Il tuo report è pronto.</h2>
-      <p class="contact-sub">Ho letto le tue risposte. C'è qualcosa di preciso che emerge — non è una valutazione generica.<br><br>
-      Lasciami il nome e la email e ti mando il report subito. Se aggiungi il WhatsApp e dai il consenso qui sotto, <em>ti scrivo io dopo</em> — non un sistema automatico, io.</p>
+      <p class="contact-sub">Ho letto le tue risposte. C'è qualcosa di preciso che emerge, non è una valutazione generica.<br><br>
+      Lasciami il nome e la email e ti mando il report subito. Se aggiungi il WhatsApp e dai il consenso qui sotto, <em>ti scrivo io dopo</em>, non un sistema automatico, io.</p>
       <div class="field"><label>Nome</label>
         <input type="text" id="f-name" placeholder="Il tuo nome" value="${state.user.name}" autocomplete="given-name">
       </div>
@@ -1111,23 +1203,68 @@ function renderReport() {
         <div class="report-header-inner">
           <div class="report-badge">${r.badge}</div>
           <h1 class="report-title">${r.title}</h1>
+          <div class="phase-stepper" id="phase-stepper">
+            <span class="pstep active" data-p="1">1</span>
+            <span class="pline" data-l="1"></span>
+            <span class="pstep" data-p="2">2</span>
+            <span class="pline" data-l="2"></span>
+            <span class="pstep" data-p="3">3</span>
+          </div>
         </div>
       </div>
       <div class="report-body" id="report-body">${r.body}</div>
     </div>`;
+
+  const p1 = document.getElementById('phase-1');
+  const p2 = document.getElementById('phase-2');
+  if (p1) p1.insertAdjacentHTML('beforeend', `
+    <div class="phase-gate" id="gate-1">
+      <div class="gate-reward">🔓 Fase 1 completata</div>
+      <div class="gate-teaser">Sapere <strong>chi sei</strong> è solo il primo pezzo. Ora ti mostro il <strong>meccanismo esatto</strong> che scatta ogni volta che molli.</div>
+      <button class="phase-unlock-btn" onclick="unlockPhase(2)"><span class="lock">🔒</span> Sblocca la Fase 2 →</button>
+      <div class="gate-progress">Prossimo: Fase 2 di 3</div>
+    </div>`);
+  if (p2) p2.insertAdjacentHTML('beforeend', `
+    <div class="phase-gate" id="gate-2">
+      <div class="gate-reward">🔓 Fase 2 completata</div>
+      <div class="gate-teaser">Hai visto <strong>come funziona</strong>. Resta la parte più importante: cosa succede se non lo interrompi, e <strong>come se ne esce</strong>.</div>
+      <button class="phase-unlock-btn" onclick="unlockPhase(3)"><span class="lock">🔒</span> Sblocca la Fase 3 →</button>
+      <div class="gate-progress">Ultima fase: la via d'uscita</div>
+    </div>`);
+
   window.scrollTo(0,0);
   setupReport();
+}
+
+function unlockPhase(n) {
+  const ph = document.getElementById('phase-' + n);
+  if (!ph) return;
+  const gate = document.getElementById('gate-' + (n - 1));
+  if (gate) gate.classList.add('gate-done');
+  ph.classList.remove('phase-locked');
+  ph.classList.add('phase-unlocked');
+  ph.querySelectorAll('.r-reveal').forEach(x => x.classList.add('in'));
+  document.querySelectorAll('.pstep').forEach(s => {
+    const p = +s.dataset.p;
+    s.classList.remove('active', 'done');
+    if (p < n) { s.classList.add('done'); s.textContent = '✓'; }
+    else { s.textContent = s.dataset.p; if (p === n) s.classList.add('active'); }
+  });
+  document.querySelectorAll('.pline').forEach(l => {
+    l.classList.toggle('done', (+l.dataset.l) < n);
+  });
+  setTimeout(() => ph.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 
 function setupReport() {
   const body = document.getElementById('report-body');
   if (body) {
-    const blocks = Array.from(body.children);
-    blocks.forEach(ch => ch.classList.add('r-reveal'));
+    const els = body.querySelectorAll('.report-p, .report-quote, .report-section-label, .report-highlight, .report-cta-block');
+    els.forEach(el => el.classList.add('r-reveal'));
     const ro = new IntersectionObserver((es) => {
       es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
-    }, { threshold: .08 });
-    blocks.forEach(ch => ro.observe(ch));
+    }, { threshold: .06 });
+    els.forEach(el => ro.observe(el));
   }
   const onScroll = () => {
     const bar = document.getElementById('report-progress');
