@@ -439,7 +439,7 @@
   .gate-progress{margin-top:15px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9fb6e6;font-weight:700}
 
   /* ============================================================
-     RECENSIONI (trigger + pannello + vetrina scorrevole)
+     MENU A TENDINA (☰) + RECENSIONI
      ============================================================ */
   .menu-trigger{position:fixed;top:16px;right:16px;z-index:72;width:46px;height:46px;border:0;cursor:pointer;border-radius:14px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
@@ -472,10 +472,7 @@
   .menu-footer{padding:14px 10px 8px;text-align:center}
   .menu-footer .mf-name{font-family:'Sora',sans-serif;font-weight:800;font-size:13px;color:var(--text)}
   .menu-footer .mf-piva{font-size:11.5px;color:var(--text-muted);margin-top:3px}
-  .reviews-empty{text-align:center;max-width:470px;margin:0 auto;padding:34px 24px;border:1.5px dashed var(--line);border-radius:20px;
-    color:var(--text-muted);font-size:14.5px;line-height:1.6;background:linear-gradient(180deg,#fff,var(--paper-2))}
-  .reviews-empty strong{color:var(--text)}
-  .reviews-empty .re-stars{color:#ffb400;font-size:20px;letter-spacing:3px;margin-bottom:10px;display:block}
+
   .rev-field{margin-bottom:12px}
   .rev-field label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--b-600);margin-bottom:5px;font-weight:700}
   .rev-field input,.rev-field textarea{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;color:var(--text);
@@ -513,6 +510,10 @@
   .reviews-agg:empty{display:none}
   .reviews-agg .rr-stars{color:#ffb400;font-size:16px;letter-spacing:1px}
   .reviews-agg strong{color:var(--text);font-family:'Sora',sans-serif;font-weight:800}
+  .reviews-empty{text-align:center;max-width:470px;margin:0 auto;padding:34px 24px;border:1.5px dashed var(--line);border-radius:20px;
+    color:var(--text-muted);font-size:14.5px;line-height:1.6;background:linear-gradient(180deg,#fff,var(--paper-2));position:relative;z-index:1}
+  .reviews-empty strong{color:var(--text)}
+  .reviews-empty .re-stars{color:#ffb400;font-size:20px;letter-spacing:3px;margin-bottom:10px;display:block}
   .reviews-marquee{position:relative;z-index:1;overflow:hidden;padding:6px 0 4px;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
     mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
@@ -569,13 +570,10 @@ const CONSENT_VERSION = 'v1-2026-06';
 // ─────────────────────────────
 // RECENSIONI (riprova sociale)
 // La vetrina si riempie con le recensioni reali inviate dalle persone e sono
-// visibili a TUTTI i visitatori. Le recensioni vengono salvate e lette da un
-// Google Apps Script (vedi file "apps-script-recensioni.gs" e le istruzioni).
-//
-// >>> UNICO PASSO DA FARE: dopo aver pubblicato lo script, incolla qui sotto
-//     l'URL della Web App (finisce con /exec) tra gli apici. <<<
+// visibili a TUTTI i visitatori. Vengono salvate e lette da un Google Apps Script
+// (vedi "apps-script-recensioni.gs"). Qui sotto l'URL della Web App (/exec).
 // ─────────────────────────────
-const REVIEWS_URL = 'https://script.google.com/macros/s/AKfycbwUeoKe3lPBozXIREWI-OAMfQMRl6qVhqr05pxR1RrCP3Ao5-c8CXYN0xq5t72pfyXy/exec';
+const REVIEWS_URL = 'https://script.google.com/macros/s/AKfycbyGhNU6aL7DKVZUc_i5BEqeidyIXq-tJfj_rjMlA5ZnHwesH3C66iM8hBEH-r-Uyi7x2g/exec';
 let reviewRating = 0;
 let REVIEWS = [];
 
@@ -1263,7 +1261,7 @@ function initLanding() {
 }
 
 // ─────────────────────────────
-// RECENSIONI: render vetrina + invio
+// RECENSIONI: vetrina + menu + invio
 // ─────────────────────────────
 function reviewCard(r) {
   const rating = Math.max(0, Math.min(5, +r.rating || 0));
@@ -1289,7 +1287,6 @@ function renderReviews() {
   if (!track) return;
 
   if (!REVIEWS.length) {
-    // nessuna recensione: mostro lo stato vuoto, nascondo carosello e media
     track.innerHTML = '';
     if (marquee) marquee.style.display = 'none';
     if (empty) empty.style.display = '';
@@ -1300,8 +1297,7 @@ function renderReviews() {
   if (empty) empty.style.display = 'none';
   if (marquee) marquee.style.display = '';
   const cards = REVIEWS.map(reviewCard).join('');
-  // duplico i contenuti per un loop continuo e senza stacchi
-  track.innerHTML = cards + cards;
+  track.innerHTML = cards + cards; // duplico per un loop continuo
   if (agg) {
     const avg = REVIEWS.reduce((a, r) => a + (+r.rating || 0), 0) / REVIEWS.length;
     const full = Math.round(avg);
@@ -1366,7 +1362,6 @@ function submitReview() {
   const review = { name, email, rating: reviewRating, text,
     date: new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) };
 
-  // salvo la recensione nel foglio Google tramite l'Apps Script (visibile a tutti)
   if (REVIEWS_URL) {
     try {
       const params = new URLSearchParams({
@@ -1377,11 +1372,9 @@ function submitReview() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString() }).catch(() => {});
     } catch (e) {}
-    // ricarico la lista ufficiale dal server dopo qualche secondo
-    setTimeout(fetchReviews, 3500);
+    setTimeout(fetchReviews, 3500); // ricarico la lista ufficiale dal server
   }
 
-  // mostro subito la recensione nella vetrina
   REVIEWS.unshift(review);
   renderReviews();
   setMsg('Grazie! La tua recensione è stata inviata. ✓', 'ok');
