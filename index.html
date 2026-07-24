@@ -514,12 +514,14 @@
     color:var(--text-muted);font-size:14.5px;line-height:1.6;background:linear-gradient(180deg,#fff,var(--paper-2));position:relative;z-index:1}
   .reviews-empty strong{color:var(--text)}
   .reviews-empty .re-stars{color:#ffb400;font-size:20px;letter-spacing:3px;margin-bottom:10px;display:block}
-  .reviews-marquee{position:relative;z-index:1;overflow:hidden;padding:6px 0 4px;
+  .reviews-marquee{position:relative;z-index:1;overflow-x:auto;overflow-y:hidden;padding:6px 0 12px;cursor:grab;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
     mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
-  .reviews-track{display:flex;gap:18px;width:max-content;animation:revScroll 52s linear infinite}
-  .reviews-marquee:hover .reviews-track{animation-play-state:paused}
-  @keyframes revScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .reviews-marquee::-webkit-scrollbar{display:none}
+  .reviews-marquee.dragging{cursor:grabbing;user-select:none}
+  .reviews-track{display:flex;gap:18px;width:max-content}
+  .reviews-hint{text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:6px;position:relative;z-index:1;opacity:.9}
   .rev-card{position:relative;flex:0 0 auto;width:300px;overflow:hidden;background:linear-gradient(180deg,#fff,var(--paper-2));
     border:1px solid var(--line);border-radius:18px;padding:24px 22px 20px;box-shadow:0 14px 34px rgba(20,58,138,.08);
     transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
@@ -1198,6 +1200,7 @@ function renderIntro() {
           <div class="reviews-marquee" id="reviews-marquee" style="display:none">
             <div class="reviews-track" id="reviews-track"></div>
           </div>
+          <div class="reviews-hint" id="reviews-hint" style="display:none">↔ Trascina o scorri per leggerle tutte</div>
         </div>
 
       </div>
@@ -1238,6 +1241,7 @@ function initLanding() {
 
   renderReviews();
   initReviewStars();
+  initReviewsScroll();
   fetchReviews();
 
   landFadeObserver();
@@ -1283,12 +1287,14 @@ function renderReviews() {
   const track = document.getElementById('reviews-track');
   const marquee = document.getElementById('reviews-marquee');
   const empty = document.getElementById('reviews-empty');
+  const hint = document.getElementById('reviews-hint');
   const agg = document.getElementById('reviews-agg');
   if (!track) return;
 
   if (!REVIEWS.length) {
     track.innerHTML = '';
     if (marquee) marquee.style.display = 'none';
+    if (hint) hint.style.display = 'none';
     if (empty) empty.style.display = '';
     if (agg) agg.innerHTML = '';
     return;
@@ -1296,6 +1302,7 @@ function renderReviews() {
 
   if (empty) empty.style.display = 'none';
   if (marquee) marquee.style.display = '';
+  if (hint) hint.style.display = REVIEWS.length > 1 ? '' : 'none';
   const cards = REVIEWS.map(reviewCard).join('');
   track.innerHTML = cards + cards; // duplico per un loop continuo
   if (agg) {
@@ -1304,6 +1311,41 @@ function renderReviews() {
     const label = REVIEWS.length === 1 ? 'recensione' : 'recensioni';
     agg.innerHTML = `<span class="rr-stars">${'★'.repeat(full)}${'☆'.repeat(5 - full)}</span> <span><strong>${avg.toFixed(1)}</strong> su 5 · ${REVIEWS.length} ${label}</span>`;
   }
+}
+
+// carosello: scorre da solo ma è anche trascinabile / scrollabile a mano
+function initReviewsScroll() {
+  const m = document.getElementById('reviews-marquee');
+  const track = document.getElementById('reviews-track');
+  if (!m || !track || m.dataset.scrollInit) return;
+  m.dataset.scrollInit = '1';
+
+  let paused = false, isDown = false, startX = 0, startScroll = 0, resumeTimer = null;
+  const speed = 0.4; // px per frame
+  const period = () => { const c = track.children; return (c.length >= 2) ? c[Math.floor(c.length / 2)].offsetLeft : 0; };
+  const wrap = () => { const p = period(); if (p <= 0) return; if (m.scrollLeft >= p) m.scrollLeft -= p; else if (m.scrollLeft < 0) m.scrollLeft += p; };
+  const scheduleResume = () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { if (!isDown) paused = false; }, 2500); };
+
+  const step = () => { if (!paused) m.scrollLeft += speed; wrap(); requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+
+  // desktop: pausa quando ci passi sopra, così leggi con calma
+  m.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') paused = true; });
+  m.addEventListener('pointerleave', () => { if (!isDown) paused = false; });
+
+  // trascinamento con il mouse
+  m.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') { paused = true; return; } // su touch resta lo scroll nativo
+    isDown = true; paused = true; m.classList.add('dragging');
+    startX = e.clientX; startScroll = m.scrollLeft;
+  });
+  window.addEventListener('pointermove', e => { if (!isDown) return; m.scrollLeft = startScroll - (e.clientX - startX); wrap(); });
+  window.addEventListener('pointerup', () => { if (isDown) { isDown = false; m.classList.remove('dragging'); } scheduleResume(); });
+
+  // touch + rotellina/trackpad
+  m.addEventListener('touchstart', () => { paused = true; }, { passive: true });
+  m.addEventListener('touchend', scheduleResume, { passive: true });
+  m.addEventListener('wheel', () => { paused = true; scheduleResume(); }, { passive: true });
 }
 
 function toggleMenu(e) {
